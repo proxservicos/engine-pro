@@ -1,55 +1,54 @@
-<!-- ENGINE PRO v3.0 — Super Prompt Generator -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ENGINE PRO — Super Prompt Generator</title>
+<title>Super Prompt Generator</title>
 
 <style>
 body{
-  font-family:system-ui,Segoe UI,Arial;
   margin:0;
+  font-family:system-ui,Segoe UI,Arial;
   background:#111;
-  color:#eee
+  color:#eee;
 }
 .wrap{
-  max-width:1200px;
+  max-width:900px;
   margin:auto;
-  padding:20px
+  padding:20px;
 }
 h1{font-size:22px;margin-bottom:5px}
-h2{font-size:16px;margin:15px 0 5px}
+.small{font-size:12px;color:#aaa;margin-bottom:15px}
 .card{
   background:#1b1b1b;
   border-radius:12px;
   padding:15px;
-  margin-bottom:15px
+  margin-bottom:15px;
 }
 label{
   font-size:13px;
   font-weight:700;
   display:block;
-  margin-top:8px
+  margin-bottom:6px;
 }
-input,select,textarea{
+textarea{
   width:100%;
-  padding:10px;
-  border-radius:8px;
+  min-height:140px;
+  padding:12px;
+  border-radius:10px;
   border:1px solid #444;
   background:#111;
-  color:#eee
+  color:#eee;
 }
-textarea{min-height:90px}
 button{
-  padding:10px 14px;
+  padding:10px 16px;
   border-radius:10px;
   border:1px solid #555;
   background:#2b2b2b;
   color:#fff;
   font-weight:800;
   cursor:pointer;
-  margin-right:6px
+  margin-right:6px;
 }
 button.primary{background:#3a3a3a}
 button.danger{
@@ -60,30 +59,21 @@ button.danger:hover{
   background:#ff5c5c;
   color:#000;
 }
-.tabs{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap
-}
-.tab{
-  padding:6px 12px;
-  border-radius:999px;
-  border:1px solid #444;
-  cursor:pointer
-}
-.tab.active{background:#555}
 .out{
-  min-height:400px;
-  font-family:monospace
+  min-height:300px;
+  font-family:monospace;
 }
-.small{font-size:12px;color:#aaa}
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px
+.history-item{
+  border:1px solid #333;
+  border-radius:8px;
+  padding:8px;
+  margin-bottom:6px;
+  cursor:pointer;
+  font-size:12px;
+  color:#ccc;
 }
-@media(max-width:800px){
-  .row{grid-template-columns:1fr}
+.history-item:hover{
+  background:#222;
 }
 </style>
 </head>
@@ -91,177 +81,128 @@ button.danger:hover{
 <body>
 <div class="wrap">
 
-<h1>ENGINE PRO — Super Prompt Generator</h1>
-<p class="small">Escolha o módulo → preencha → gere → copie → execute.</p>
+<h1>Super Prompt Generator</h1>
+<p class="small">
+Digite sua ideia livremente. O sistema salva tudo automaticamente.
+</p>
 
 <div class="card">
-
-<div class="tabs" id="tabs"></div>
-
-<label>Ideia bruta</label>
-<textarea id="ideia"></textarea>
-
-<div class="row">
-  <div>
-    <label>Meta objetiva</label>
-    <input id="meta" placeholder="Ex: R$1.000 em 7 dias">
-  </div>
-  <div>
-    <label>Nicho</label>
-    <input id="nicho">
-  </div>
-</div>
-
-<div class="row">
-  <div>
-    <label>Plataforma</label>
-    <select id="plataforma">
-      <option>WhatsApp</option>
-      <option>YouTube</option>
-      <option>Instagram</option>
-      <option>Marketplace</option>
-      <option>Produto Digital</option>
-    </select>
-  </div>
-  <div>
-    <label>Público acessível agora</label>
-    <input id="publico">
-  </div>
-</div>
-
-<div class="row">
-  <div>
-    <label>Não aparecer</label>
-    <select id="aparecer">
-      <option>SIM</option>
-      <option>NÃO</option>
-    </select>
-  </div>
-  <div>
-    <label>Não usar voz</label>
-    <select id="voz">
-      <option>SIM</option>
-      <option>NÃO</option>
-    </select>
-  </div>
-</div>
-
-<div class="row">
-  <div>
-    <label>Orçamento (R$)</label>
-    <input id="orcamento">
-  </div>
-  <div>
-    <label>Tempo diário (h)</label>
-    <input id="tempo">
-  </div>
-</div>
-
-<br>
-
+<label>IDEIA</label>
+<textarea id="ideia" placeholder="Escreva aqui sua ideia completa..."></textarea>
+<br><br>
 <button class="primary" onclick="gerar()">GERAR SUPER PROMPT</button>
-<button onclick="copiar()">COPIAR</button>
-<button class="danger" onclick="limparTudo()">APAGAR TUDO</button>
-
+<button class="danger" onclick="limpar()">APAGAR TUDO</button>
 </div>
 
 <div class="card">
-<h2>SUPER PROMPT GERADO</h2>
+<label>SUPER PROMPT GERADO</label>
 <textarea class="out" id="saida"></textarea>
+</div>
+
+<div class="card">
+<label>HISTÓRICO (clique para restaurar)</label>
+<div id="historico"></div>
 </div>
 
 </div>
 
 <script>
-const MODULES=[
-  "Dinheiro Rápido",
-  "Canal Dark",
-  "Produto Digital",
-  "Serviço Local",
-  "Marketplace",
-  "Automação"
-];
+const ideiaEl = document.getElementById("ideia");
+const saidaEl = document.getElementById("saida");
+const historicoEl = document.getElementById("historico");
 
-let modulo="Dinheiro Rápido";
+// ---------- AUTO SAVE ----------
+ideiaEl.addEventListener("input", salvarEstado);
+saidaEl.addEventListener("input", salvarEstado);
 
-const tabs=document.getElementById("tabs");
+function salvarEstado(){
+  localStorage.setItem("ideia_atual", ideiaEl.value);
+  localStorage.setItem("saida_atual", saidaEl.value);
+}
 
-MODULES.forEach(m=>{
-  const t=document.createElement("div");
-  t.className="tab";
-  t.innerText=m;
-  t.onclick=()=>{
-    modulo=m;
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-  };
-  tabs.appendChild(t);
-});
-
-tabs.firstChild.classList.add("active");
-
+// ---------- GERAR ----------
 function gerar(){
-  saida.value=
-`VOCÊ É UM OPERADOR SÊNIOR COM 20+ ANOS DE EXPERIÊNCIA.
+  const ideia = ideiaEl.value.trim();
+  if(!ideia){
+    alert("Escreva uma ideia antes de gerar.");
+    return;
+  }
 
-MÓDULO ATIVO: ${modulo}
+  const prompt =
+`VOCÊ É UM ESPECIALISTA SÊNIOR COM MAIS DE 20 ANOS DE EXPERIÊNCIA.
 
-IDEIA:
-${ideia.value}
+IDEIA DO USUÁRIO:
+${ideia}
 
-META:
-${meta.value}
+=== SUA MISSÃO ===
 
-NICHO:
-${nicho.value}
+1️⃣ IDENTIFIQUE:
+– Nicho
+– Produto ou serviço
+– Público-alvo
+– Objetivo final
 
-CONTEXTO:
-Plataforma: ${plataforma.value}
-Público acessível agora: ${publico.value}
+2️⃣ ORGANIZE A IDEIA EM ALGO EXECUTÁVEL
 
-RESTRIÇÕES:
-Não aparecer: ${aparecer.value}
-Não usar voz: ${voz.value}
-Orçamento: R$${orcamento.value}
-Tempo diário: ${tempo.value}h
+3️⃣ CRIE:
+– Proposta clara
+– Estratégia lógica
+– Plano prático inicial
 
-=== TAREFAS OBRIGATÓRIAS ===
-
-1️⃣ VALIDE A OFERTA EM 1 FRASE
-
-2️⃣ GERE 3 MENSAGENS DE ABORDAGEM
-– Direta
-– Consultiva
-– Curta e agressiva
-
-3️⃣ GERE 10 ÂNGULOS QUE FUREM A BOLHA
-
-4️⃣ MONTE UM PLANO DE EXECUÇÃO 72H
-
-5️⃣ DIGA:
-– O que NÃO fazer
-– O erro mais fatal
-– O primeiro passo AGORA
+4️⃣ DIGA SEM FILTRO:
+– O que funciona
+– O que NÃO funciona
+– O maior erro
+– O primeiro passo imediato
 
 ESTILO:
 Direto, honesto, sem jargão.
 Se a ideia for ruim, descarte e proponha outra melhor.
 `;
+
+  saidaEl.value = prompt;
+  salvarEstado();
+  salvarHistorico(ideia);
 }
 
-function copiar(){
-  navigator.clipboard.writeText(saida.value);
-  alert("Prompt copiado.");
+// ---------- LIMPAR ----------
+function limpar(){
+  ideiaEl.value = "";
+  saidaEl.value = "";
+  localStorage.removeItem("ideia_atual");
+  localStorage.removeItem("saida_atual");
 }
 
-function limparTudo(){
-  document.querySelectorAll("input, textarea").forEach(el=>el.value="");
-  document.querySelectorAll("select").forEach(el=>el.selectedIndex=0);
-  saida.value="";
-  modulo="Dinheiro Rápido";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  tabs.firstChild.classList.add("active");
+// ---------- HISTÓRICO ----------
+function salvarHistorico(ideia){
+  let hist = JSON.parse(localStorage.getItem("historico")) || [];
+  hist.unshift(ideia);
+  hist = hist.slice(0, 10); // mantém só as 10 últimas
+  localStorage.setItem("historico", JSON.stringify(hist));
+  renderHistorico();
 }
+
+function renderHistorico(){
+  const hist = JSON.parse(localStorage.getItem("historico")) || [];
+  historicoEl.innerHTML = "";
+  hist.forEach(item=>{
+    const div = document.createElement("div");
+    div.className = "history-item";
+    div.innerText = item.substring(0,120) + (item.length > 120 ? "..." : "");
+    div.onclick = ()=>{
+      ideiaEl.value = item;
+      salvarEstado();
+    };
+    historicoEl.appendChild(div);
+  });
+}
+
+// ---------- RESTAURA AO ABRIR ----------
+(function restaurar(){
+  ideiaEl.value = localStorage.getItem("ideia_atual") || "";
+  saidaEl.value = localStorage.getItem("saida_atual") || "";
+  renderHistorico();
+})();
 </script>
 
 </body>
