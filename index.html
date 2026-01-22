@@ -1,0 +1,210 @@
+<!-- ENGINE PRO v3.0 — Super Prompt Generator -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGINE PRO — Super Prompt Generator</title>
+<style>
+body{font-family:system-ui,Segoe UI,Arial;margin:0;background:#111;color:#eee}
+.wrap{max-width:1200px;margin:auto;padding:20px}
+h1{font-size:22px;margin-bottom:5px}
+h2{font-size:16px;margin:15px 0 5px}
+.card{background:#1b1b1b;border-radius:12px;padding:15px;margin-bottom:15px}
+label{font-size:13px;font-weight:700;display:block;margin-top:8px}
+input,select,textarea{
+width:100%;padding:10px;border-radius:8px;
+border:1px solid #444;background:#111;color:#eee
+}
+textarea{min-height:90px}
+button{
+padding:10px 14px;border-radius:10px;
+border:1px solid #555;background:#2b2b2b;
+color:#fff;font-weight:800;cursor:pointer
+}
+button.primary{background:#3a3a3a}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{padding:6px 12px;border-radius:999px;border:1px solid #444;cursor:pointer}
+.tab.active{background:#555}
+.out{min-height:400px;font-family:monospace}
+.small{font-size:12px;color:#aaa}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:800px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<h1>ENGINE PRO — Super Prompt Generator</h1>
+<p class="small">Escolha o módulo → preencha → gere → copie → execute.</p>
+
+<div class="card">
+<div class="tabs" id="tabs"></div>
+
+<label>Ideia bruta</label>
+<textarea id="ideia"></textarea>
+
+<div class="row">
+<div>
+<label>Meta objetiva</label>
+<input id="meta" placeholder="Ex: R$1.000 em 7 dias">
+</div>
+<div>
+<label>Nicho</label>
+<input id="nicho">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Plataforma</label>
+<select id="plataforma">
+<option>WhatsApp</option>
+<option>YouTube</option>
+<option>Instagram</option>
+<option>Marketplace</option>
+<option>Produto Digital</option>
+</select>
+</div>
+<div>
+<label>Público acessível agora</label>
+<input id="publico">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Não aparecer</label>
+<select id="aparecer"><option>SIM</option><option>NÃO</option></select>
+</div>
+<div>
+<label>Não usar voz</label>
+<select id="voz"><option>SIM</option><option>NÃO</option></select>
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Orçamento (R$)</label>
+<input id="orcamento">
+</div>
+<div>
+<label>Tempo diário (h)</label>
+<input id="tempo">
+</div>
+</div>
+
+<button class="primary" onclick="gerar()">GERAR SUPER PROMPT</button>
+<button onclick="copiar()">COPIAR</button>
+
+</div>
+
+<div class="card">
+<h2>SUPER PROMPT GERADO</h2>
+<textarea class="out" id="saida"></textarea>
+</div>
+
+</div>
+
+<script>
+const MODULES=[
+"Dinheiro Rápido",
+"Canal Dark",
+"Produto Digital",
+"Serviço Local",
+"Marketplace",
+"Automação"
+];
+
+let modulo="Dinheiro Rápido";
+
+const tabs=document.getElementById("tabs");
+MODULES.forEach(m=>{
+let t=document.createElement("div");
+t.className="tab";
+t.innerText=m;
+t.onclick=()=>{modulo=m;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');};
+tabs.appendChild(t);
+});
+tabs.firstChild.classList.add("active");
+
+function gerar(){
+let ideia=ideiaEl.value;
+let meta=metaEl.value;
+let nicho=nichoEl.value;
+let plataforma=plataformaEl.value;
+let publico=publicoEl.value;
+let aparecer=aparecerEl.value;
+let voz=vozEl.value;
+let orcamento=orcamentoEl.value;
+let tempo=tempoEl.value;
+
+saida.value=
+`VOCÊ É UM OPERADOR SÊNIOR COM 20+ ANOS DE EXPERIÊNCIA.
+
+MÓDULO ATIVO: ${modulo}
+
+IDEIA:
+${ideia}
+
+META:
+${meta}
+
+NICHO:
+${nicho}
+
+CONTEXTO:
+Plataforma: ${plataforma}
+Público acessível agora: ${publico}
+
+RESTRIÇÕES:
+Não aparecer: ${aparecer}
+Não usar voz: ${voz}
+Orçamento: R$${orcamento}
+Tempo diário: ${tempo}h
+
+=== TAREFAS OBRIGATÓRIAS ===
+
+1️⃣ VALIDE A OFERTA EM 1 FRASE (se não couber, simplifique)
+
+2️⃣ GERE 3 MENSAGENS DE ABORDAGEM:
+– Direta
+– Consultiva
+– Curta e agressiva
+
+3️⃣ GERE 10 ÂNGULOS QUE FUREM A BOLHA
+(baseados em dor, curiosidade, contraste ou ganho rápido)
+
+4️⃣ MONTE UM PLANO DE EXECUÇÃO 72H:
+– HOJE
+– AMANHÃ
+– DEPOIS DE AMANHÃ
+
+5️⃣ DIGA CLARAMENTE:
+– O que NÃO fazer
+– O erro mais fatal
+– O primeiro passo executável AGORA
+
+ESTILO:
+Direto, honesto, sem jargão, sem romantizar.
+Se a ideia for ruim, descarte e proponha outra melhor.
+`;
+}
+
+function copiar(){
+navigator.clipboard.writeText(saida.value);
+alert("Prompt copiado.");
+}
+
+const ideiaEl=ideia;
+const metaEl=meta;
+const nichoEl=nicho;
+const plataformaEl=plataforma;
+const publicoEl=publico;
+const aparecerEl=aparecer;
+const vozEl=voz;
+const orcamentoEl=orcamento;
+const tempoEl=tempo;
+</script>
+</body>
+</html>
