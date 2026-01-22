@@ -8,22 +8,29 @@
 <style>
 body{
   margin:0;
-  font-family:system-ui,Segoe UI,Arial;
+  font-family:system-ui, Segoe UI, Arial;
   background:#111;
   color:#eee;
 }
 .wrap{
   max-width:900px;
   margin:auto;
-  padding:20px;
+  padding:24px;
 }
-h1{font-size:22px;margin-bottom:5px}
-.small{font-size:12px;color:#aaa;margin-bottom:15px}
+h1{
+  font-size:22px;
+  margin-bottom:4px;
+}
+.small{
+  font-size:12px;
+  color:#aaa;
+  margin-bottom:16px;
+}
 .card{
   background:#1b1b1b;
   border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
+  padding:16px;
+  margin-bottom:16px;
 }
 label{
   font-size:13px;
@@ -39,6 +46,11 @@ textarea{
   border:1px solid #444;
   background:#111;
   color:#eee;
+  resize:vertical;
+}
+textarea.out{
+  min-height:320px;
+  font-family:monospace;
 }
 button{
   padding:10px 16px;
@@ -48,9 +60,11 @@ button{
   color:#fff;
   font-weight:800;
   cursor:pointer;
-  margin-right:6px;
+  margin-right:8px;
 }
-button.primary{background:#3a3a3a}
+button.primary{
+  background:#3a3a3a;
+}
 button.danger{
   background:#1e1e1e;
   color:#ff5c5c;
@@ -58,22 +72,6 @@ button.danger{
 button.danger:hover{
   background:#ff5c5c;
   color:#000;
-}
-.out{
-  min-height:300px;
-  font-family:monospace;
-}
-.history-item{
-  border:1px solid #333;
-  border-radius:8px;
-  padding:8px;
-  margin-bottom:6px;
-  cursor:pointer;
-  font-size:12px;
-  color:#ccc;
-}
-.history-item:hover{
-  background:#222;
 }
 </style>
 </head>
@@ -83,126 +81,75 @@ button.danger:hover{
 
 <h1>Super Prompt Generator</h1>
 <p class="small">
-Digite sua ideia livremente. O sistema salva tudo automaticamente.
+Escreva sua ideia livremente. Coloque tudo nela: nicho, produto, objetivo, contexto.
 </p>
 
 <div class="card">
 <label>IDEIA</label>
-<textarea id="ideia" placeholder="Escreva aqui sua ideia completa..."></textarea>
+<textarea id="ideia" placeholder="Ex: Quero criar um produto digital simples para vender rápido, sem aparecer, usando IA..."></textarea>
 <br><br>
 <button class="primary" onclick="gerar()">GERAR SUPER PROMPT</button>
 <button class="danger" onclick="limpar()">APAGAR TUDO</button>
 </div>
 
 <div class="card">
-<label>SUPER PROMPT GERADO</label>
+<label>SAÍDA</label>
 <textarea class="out" id="saida"></textarea>
-</div>
-
-<div class="card">
-<label>HISTÓRICO (clique para restaurar)</label>
-<div id="historico"></div>
 </div>
 
 </div>
 
 <script>
-const ideiaEl = document.getElementById("ideia");
-const saidaEl = document.getElementById("saida");
-const historicoEl = document.getElementById("historico");
-
-// ---------- AUTO SAVE ----------
-ideiaEl.addEventListener("input", salvarEstado);
-saidaEl.addEventListener("input", salvarEstado);
-
-function salvarEstado(){
-  localStorage.setItem("ideia_atual", ideiaEl.value);
-  localStorage.setItem("saida_atual", saidaEl.value);
-}
-
-// ---------- GERAR ----------
 function gerar(){
-  const ideia = ideiaEl.value.trim();
+  const ideia = document.getElementById("ideia").value.trim();
+
   if(!ideia){
-    alert("Escreva uma ideia antes de gerar.");
+    alert("Digite uma ideia antes de gerar.");
     return;
   }
 
-  const prompt =
+  document.getElementById("saida").value =
 `VOCÊ É UM ESPECIALISTA SÊNIOR COM MAIS DE 20 ANOS DE EXPERIÊNCIA.
+
+ANALISE A IDEIA ABAIXO COM RIGOR TÉCNICO E PRAGMATISMO:
 
 IDEIA DO USUÁRIO:
 ${ideia}
 
 === SUA MISSÃO ===
 
-1️⃣ IDENTIFIQUE:
-– Nicho
-– Produto ou serviço
+1️⃣ EXTRAIA DA IDEIA:
+– Nicho implícito
+– Tipo de produto ou serviço
 – Público-alvo
-– Objetivo final
+– Objetivo real
 
-2️⃣ ORGANIZE A IDEIA EM ALGO EXECUTÁVEL
+2️⃣ SE A IDEIA ESTIVER CONFUSA:
+– Organize
+– Simplifique
+– Torne executável
 
-3️⃣ CRIE:
-– Proposta clara
-– Estratégia lógica
-– Plano prático inicial
+3️⃣ ENTREGUE:
+– Uma proposta clara
+– Um caminho lógico
+– Um plano prático inicial
 
 4️⃣ DIGA SEM FILTRO:
 – O que funciona
 – O que NÃO funciona
-– O maior erro
-– O primeiro passo imediato
+– O erro mais fatal
+– O primeiro passo executável AGORA
 
 ESTILO:
-Direto, honesto, sem jargão.
-Se a ideia for ruim, descarte e proponha outra melhor.
+Direto, honesto, sem jargão, sem romantizar.
+Se a ideia for fraca, descarte e proponha outra melhor.
 `;
-
-  saidaEl.value = prompt;
-  salvarEstado();
-  salvarHistorico(ideia);
 }
 
-// ---------- LIMPAR ----------
 function limpar(){
-  ideiaEl.value = "";
-  saidaEl.value = "";
-  localStorage.removeItem("ideia_atual");
-  localStorage.removeItem("saida_atual");
+  document.getElementById("ideia").value = "";
+  document.getElementById("saida").value = "";
 }
-
-// ---------- HISTÓRICO ----------
-function salvarHistorico(ideia){
-  let hist = JSON.parse(localStorage.getItem("historico")) || [];
-  hist.unshift(ideia);
-  hist = hist.slice(0, 10); // mantém só as 10 últimas
-  localStorage.setItem("historico", JSON.stringify(hist));
-  renderHistorico();
-}
-
-function renderHistorico(){
-  const hist = JSON.parse(localStorage.getItem("historico")) || [];
-  historicoEl.innerHTML = "";
-  hist.forEach(item=>{
-    const div = document.createElement("div");
-    div.className = "history-item";
-    div.innerText = item.substring(0,120) + (item.length > 120 ? "..." : "");
-    div.onclick = ()=>{
-      ideiaEl.value = item;
-      salvarEstado();
-    };
-    historicoEl.appendChild(div);
-  });
-}
-
-// ---------- RESTAURA AO ABRIR ----------
-(function restaurar(){
-  ideiaEl.value = localStorage.getItem("ideia_atual") || "";
-  saidaEl.value = localStorage.getItem("saida_atual") || "";
-  renderHistorico();
-})();
 </script>
 
 </body>
